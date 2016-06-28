@@ -1,4 +1,4 @@
-Copyright (c) 2015, Jonathon Menz
+Copyright (c) 2015, Jonathon Menz (Postmark), Michael van Schaik (adaption to Mailgun)
 
 Permission to use, copy, modify, and/or distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
