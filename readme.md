@@ -24,7 +24,8 @@ In your project's `_config/config.yml` file:
 
 ```yaml
 MailgunMailer:
-  api_key: 'your-key-goes-here'
+  api_key: 'key-goes-here'
+  api_domain: 'verified-domain'
 ```
 
 In your project's `_config.php` file:
