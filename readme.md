@@ -6,6 +6,7 @@ This module lets you send SilverStripe emails through the [official Mailgun PHP 
  * PHP 5.4+
  * SilverStripe ~3.1
  * [Mailgun-PHP](https://github.com/mailgun/mailgun-php)
+ * (optional) set up a manual cron task, or use silverstripe-crontask or silverstripe-queuedjobs(?) to keep log synced
 
 ## Installation
 Install with Composer. [Learn how](https://docs.silverstripe.org/en/getting_started/composer/#adding-modules-to-your-project)
@@ -17,6 +18,8 @@ composer require "micschk/silverstripe-mailgun-mailer:~1.0"
 ## Documentation
 
 You will need to provide a Mailgun API key for a verified domain that you have set up in your [Mailgun account](https://mailgun.com/app/domains/).
+
+Also, if you want to synchronize the Mailgun log, you will need to set up some way to run/ Mailgun_SyncLogTask::poll() every not and then. This gets the Mailgun events log from the API and saves it to the local database so you can see when messages got sent, openend and/or bounced etc.
 
 ## Example configuration
 

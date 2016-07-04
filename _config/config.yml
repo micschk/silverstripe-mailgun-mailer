@@ -1,0 +1,7 @@
+---
+Name: mailgun_routes
+After: framework/routes#coreroutes
+---
+Director:
+  rules:
+    'mailgun-hooks': 'MailgunHooks_Controller'
