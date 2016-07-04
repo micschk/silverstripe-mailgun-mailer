@@ -1,7 +1,9 @@
 ---
-Name: mailgun_routes
-After: framework/routes#coreroutes
+Name: mailgun_config
+After: 'framework/*','cms/*'
 ---
-Director:
-  rules:
-    'mailgun-hooks': 'MailgunHooks_Controller'
+MailgunMailer:
+#  api_key: 'add-your-key'
+#  api_domain: 'api-domain'
+#  track_opens: true
+#  track_clicks: true
