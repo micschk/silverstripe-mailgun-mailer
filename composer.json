@@ -12,9 +12,7 @@
 		"php": ">=5.4",
 		"silverstripe/framework": "~3.1",
 		"mailgun/mailgun-php": "~2.0",
-		"php-http/guzzle6-adapter": "^1.0",
-		"peekmo/jsonpath:dev-master": "dev-master",
-		"phptek/jsontext": "~0.6"
+		"php-http/guzzle6-adapter": "^1.0"
 	},
 	"extra": {
 		"installer-name": "mailer-mailgun"
