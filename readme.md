@@ -1,4 +1,4 @@
-# SilverStripe Mailgun Mailer
+# SilverStripe Mailer for sending mail via the Mailgun API
 
 This module lets you send SilverStripe emails through the [official Mailgun PHP library](https://github.com/mailgun/mailgun-php), falling back to PHP's built-in `sendmail()` if Mailgun is unreachable.
 

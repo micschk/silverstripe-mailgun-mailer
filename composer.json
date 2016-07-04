@@ -1,6 +1,6 @@
 {
 	"name": "micschk/silverstripe-mailer-mailgun",
-	"description": "Mailgun mailer class for SilverStripe",
+	"description": "SilverStripe Mailer for sending mail via the Mailgun API",
 	"type": "silverstripe-module",
 	"keywords": ["mailgun", "mailer", "email", "silverstripe"],
 	"license": "BSD-3-Clause",
