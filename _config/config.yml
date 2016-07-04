@@ -5,5 +5,5 @@ After: 'framework/*','cms/*'
 MailgunMailer:
 #  api_key: 'add-your-key'
 #  api_domain: 'api-domain'
-#  track_opens: true
+  track_opens: true
 #  track_clicks: true
