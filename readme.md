@@ -12,7 +12,7 @@ This module lets you send SilverStripe emails through the [official Mailgun PHP 
 Install with Composer. [Learn how](https://docs.silverstripe.org/en/getting_started/composer/#adding-modules-to-your-project)
 
 ```
-composer require "micschk/silverstripe-mailgun-mailer:~1.0"
+composer require "micschk/silverstripe-mailer-mailgun:~1.0"
 ```
 
 ## Documentation
