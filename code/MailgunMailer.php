@@ -207,6 +207,7 @@ class MailgunMailer extends Mailer
 
             if ($cc) $mb->addCcRecipient($cc);
             if ($bcc) $mb->addBccRecipient($bcc);
+            if ($replyTo) $mb->setReplyToAddress($replyTo);
             if ($plainContent) $mb->setTextBody($plainContent);
             if ($htmlContent) $mb->setHtmlBody($htmlContent);
             if ($customHeaders && is_array($customHeaders)) {
