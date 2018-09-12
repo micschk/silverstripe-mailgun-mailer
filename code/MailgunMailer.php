@@ -12,6 +12,14 @@ class MailgunMailer extends Mailer
 {
 
     /**
+     * Test mode, dont actually send out mails
+     *
+     * @config
+     * @var bool
+     */
+    private static $test_mode = false;
+
+    /**
      * Your Mailgun App API Key. Get one at https://mailgun.com/
      *
      * @config
@@ -20,30 +28,60 @@ class MailgunMailer extends Mailer
     private static $api_key = '';
 
     /**
+     * Mailgun API endpoint to use, depends on region
+     *
+     * @config
+     * @var string
+     */
+    private static $api_endpoint = 'api.mailgun.net';
+
+    /**
      * List of confirmed domains. Set them up at https://mailgun.com/
      *
      * @config
-     * @var array
+     * @var string
      */
     private static $api_domain = '';
 
     /**
      * @config
-     * @var string
+     * @var bool
      */
     private static $track_opens = false;
 
     /**
      * @config
-     * @var array
+     * @var bool
      */
     private static $track_clicks = false;
+
+    /**
+     * Try to 'inline' images (include images in the mail body instead of linking to them)
+     *
+     * @config
+     * @var bool
+     */
+    private static $inline_images = true;
+
+//    /**
+//     * @config
+//     * @var bool
+//     */
+//    private static $log_messages = false;
 
     public static function getApiClient()
     {
         $http_client = new \Http\Adapter\Guzzle6\Client();
-        $mg = new \Mailgun\Mailgun(self::getApiKey(), $http_client);
+//        $mg = new \Mailgun\Mailgun(self::getApiKey(), $http_client);
+        $mg = new \Mailgun\Mailgun(self::getApiKey(), $http_client, self::getApiEndpoint());
         return $mg;
+    }
+
+    public static function getApiEndpoint()
+    {
+        $apiEndpoint = self::config()->get('api_endpoint');
+        if (!$apiEndpoint) user_error('A Mailgun API ENDPOINT is required', E_USER_ERROR);
+        return $apiEndpoint;
     }
 
     public static function getApiDomain()
@@ -67,6 +105,7 @@ class MailgunMailer extends Mailer
      */
     public function sendPlain($to, $from, $subject, $plainContent, $attachedFiles = false, $customheaders = false)
     {
+        if(self::config()->get('test_mode')) return;
         $result = $this->sendMailgunEmail($to, $from, $subject, false, $attachedFiles, $customheaders, $plainContent);
         if ($result === false) {
             // add our own message-id to headers and get reference
@@ -87,6 +126,11 @@ class MailgunMailer extends Mailer
      */
     public function sendHTML($to, $from, $subject, $htmlContent, $attachedFiles = false, $customheaders = false, $plainContent = false)
     {
+        if(self::config()->get('test_mode')) return;
+
+        // inline images
+
+
         $result = $this->sendMailgunEmail($to, $from, $subject, $htmlContent, $attachedFiles, $customheaders, $plainContent);
         if ($result === false) {
             // add our own message-id to headers and get reference
@@ -186,13 +230,6 @@ class MailgunMailer extends Mailer
             $customHeaders = NULL;
         }
 
-        // Ensure from address is valid
-//		if (!in_array($from, $api_domain)) {
-//			// Fallback to first valid signature
-//			if (!$replyTo) $replyTo = $from;
-//			$from = $sender_domains[0];
-//		}
-
         // Send the email
         try {
             $mg = self::getApiClient();
@@ -207,8 +244,28 @@ class MailgunMailer extends Mailer
 
             if ($cc) $mb->addCcRecipient($cc);
             if ($bcc) $mb->addBccRecipient($bcc);
-            if ($replyTo) $mb->setReplyToAddress($replyTo);
             if ($plainContent) $mb->setTextBody($plainContent);
+
+            // Inline images
+            if($htmlContent && self::config()->get('inline_images')){
+                preg_match_all('/(?:< *img[^>]*src *= *["\'])(?P<imgurls>[^"\']*)/i', $htmlContent, $imageMatches);
+                $imagesToReplace = array_unique($imageMatches['imgurls']);
+                if(count($imagesToReplace)) {
+                    foreach ($imagesToReplace as $imageURL) {
+                        // find image path from image url (may or may not include host, we dont need it anyway)
+                        $url_parts = parse_url($imageURL);
+                        $img_path = str_replace(BASE_URL, BASE_PATH, $url_parts['path']);
+                        // test if exists on this server (and read contents)
+                        if (!is_file($img_path)) { continue; } // skip
+                        // include inline
+                        $mb->addInlineImage("@$img_path");
+                        // replace urls with cid:name.ext in html
+                        $img_cid = 'cid:' . pathinfo($img_path, PATHINFO_FILENAME) . '.' . pathinfo($img_path, PATHINFO_EXTENSION);
+                        $htmlContent = str_replace($imageURL, $img_cid, $htmlContent);
+                    }
+                }
+            }
+
             if ($htmlContent) $mb->setHtmlBody($htmlContent);
             if ($customHeaders && is_array($customHeaders)) {
                 foreach ($customHeaders as $headerName => $headerValue) {
@@ -230,7 +287,7 @@ class MailgunMailer extends Mailer
             //		$mb->setDeliveryTime("tomorrow 8:00AM", "PST");
             $mb->setOpenTracking($this->config()->get('track_opens'));
             $mb->setClickTracking($this->config()->get('track_clicks'));
-            
+
             # send the message.
             $result = $mg->post(self::getApiDomain()."/messages", $mb->getMessage(), $mb->getFiles());
 
@@ -240,6 +297,11 @@ class MailgunMailer extends Mailer
             // 			[message] => Queued. Thank you.
             // 		)
             //  	[http_response_code] => 200 )
+
+            // Log messages (just create a reference)
+//            if(self::config()->get('log_messages') && $result->http_response_code == 200){
+//                MailgunLogEntry::GetOrCreate($result->http_response_body->id);
+//            }
 
             return $result;
 
