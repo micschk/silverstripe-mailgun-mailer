@@ -11,9 +11,9 @@
 	"require": {
 		"php": ">=5.4",
 		"silverstripe/framework": "~3.1",
-		"mailgun/mailgun-php": "~2.0",
-		"php-http/curl-client": "@stable",
-		"guzzlehttp/psr7": "@stable"
+		"mailgun/mailgun-php": "^2.6",
+		"php-http/curl-client": "^1.7",
+		"guzzlehttp/psr7": "^1.4",
 	},
 	"extra": {
 		"installer-name": "mailer-mailgun"
