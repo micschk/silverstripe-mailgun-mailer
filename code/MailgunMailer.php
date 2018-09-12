@@ -25,7 +25,7 @@ class MailgunMailer extends Mailer
      * @config
      * @var bool
      */
-    private static $fallback_to_default = true;
+    private static $fallback_to_mailer = true;
 
     /**
      * Your Mailgun App API Key. Get one at https://mailgun.com/
@@ -214,7 +214,7 @@ class MailgunMailer extends Mailer
     private function sendMailgunEmail($to, $from, $subject, $htmlContent = NULL, $attachedFiles = NULL, $customHeaders = NULL, $plainContent = NULL)
     {
         // ERR or WARN in case of problems (WARNING should allow fallback to default Mailer on production, which is legacy/default behaviour)
-        $err_type = self::config()->fallback_to_default ? E_USER_WARNING : E_USER_ERROR;
+        $err_type = self::config()->fallback_to_mailer ? E_USER_WARNING : E_USER_ERROR;
 
         // We need a valid $to address
         if ( ! filter_var($to, FILTER_VALIDATE_EMAIL)) {
