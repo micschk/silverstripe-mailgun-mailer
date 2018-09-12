@@ -20,6 +20,14 @@ class MailgunMailer extends Mailer
     private static $test_mode = false;
 
     /**
+     * Fallback to default Mailer in case of Mailgun API/other errors
+     *
+     * @config
+     * @var bool
+     */
+    private static $fallback_to_default = true;
+
+    /**
      * Your Mailgun App API Key. Get one at https://mailgun.com/
      *
      * @config
@@ -205,11 +213,30 @@ class MailgunMailer extends Mailer
      */
     private function sendMailgunEmail($to, $from, $subject, $htmlContent = NULL, $attachedFiles = NULL, $customHeaders = NULL, $plainContent = NULL)
     {
+        // ERR or WARN in case of problems (WARNING should allow fallback to default Mailer on production, which is legacy/default behaviour)
+        $err_type = self::config()->fallback_to_default ? E_USER_WARNING : E_USER_ERROR;
+
+        // We need a valid $to address
+        if ( ! filter_var($to, FILTER_VALIDATE_EMAIL)) {
+            user_error('MailgunMailer::sendMailgunEmail invalid $to [' . $to . ']', $err_type);
+            return false;
+//            $from = Email::config()->get('admin_email');
+        }
+        // We need a valid $from address
+        if ( ! filter_var($from, FILTER_VALIDATE_EMAIL)) {
+            // ... and throw error if still invalid
+            user_error('MailgunMailer::sendMailgunEmail invalid $from [' . $from . ']. Maybe set a default Email.admin_email in yaml config?', $err_type);
+            return false;
+        }
+
         $cc = NULL;
         $bcc = NULL;
         $replyTo = NULL;
 
-        if (!($htmlContent || $plainContent)) user_error("Can't send email with no content", E_USER_ERROR);
+        if (!($htmlContent || $plainContent)) {
+            user_error("Can't send email with no content", $err_type);
+            return false;
+        }
 
         // Parse out problematic custom headers
         if (is_array($customHeaders)) {
@@ -306,8 +333,8 @@ class MailgunMailer extends Mailer
             return $result;
 
         } catch (\Exception $e) {
-            // A general exception is thown if the API was unreachable or times out.
-            user_error('Mailgun API exception: ' . $e->getMessage(), E_USER_WARNING);
+            // A general exception is thrown if the API was unreachable or times out
+            user_error('Mailgun API exception: ' . $e->getMessage(), $err_type);
             return false;
         }
     }
